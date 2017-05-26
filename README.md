@@ -9,7 +9,7 @@
 - [x] Saving to photos 
 - [x] Cool animations 
 - [x] Uses iOS Taptic Engine feedback 
-
+- [x] Crop image
 
 ## Installation
 
