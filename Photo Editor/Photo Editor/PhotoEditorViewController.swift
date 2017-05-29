@@ -23,9 +23,7 @@ public final class PhotoEditorViewController: UIViewController {
     //To hold the drawings and stickers
     @IBOutlet weak var tempImageView: UIImageView!
     @IBOutlet weak var topToolbar: UIView!
-    @IBOutlet weak var topGradient: UIView!
     @IBOutlet weak var bottomToolbar: UIView!
-    @IBOutlet weak var bottomGradient: UIView!
     @IBOutlet weak var doneButton: UIButton!
     @IBOutlet weak var deleteView: UIView!
     @IBOutlet weak var colorsCollectionView: UICollectionView!
@@ -50,7 +48,6 @@ public final class PhotoEditorViewController: UIViewController {
     var lastPanPoint: CGPoint?
     var lastTextViewTransform: CGAffineTransform?
     var lastTextViewTransCenter: CGPoint?
-    var lastTextViewFont:UIFont?
     var activeTextView: UITextView?
     var imageRotated: Bool = false
     var imageViewToPan: UIImageView?
@@ -138,6 +135,16 @@ public final class PhotoEditorViewController: UIViewController {
         hideToolbar(hide: false)
         isDrawing = false
     }
+    
+    @IBAction func cropButtonTapped(_ sender: Any) {
+        let controller = CropViewController()
+        controller.delegate = self
+        controller.image = image
+        
+        let navController = UINavigationController(rootViewController: controller)
+        present(navController, animated: true, completion: nil)
+    }
+    
     
     func keyboardWillShow(notification: NSNotification) {
         doneButton.isHidden = false
@@ -266,9 +273,7 @@ public final class PhotoEditorViewController: UIViewController {
     
     func hideToolbar(hide: Bool) {
         topToolbar.isHidden = hide
-        topGradient.isHidden = hide
         bottomToolbar.isHidden = hide
-        bottomGradient.isHidden = hide
     }
     
 }
@@ -293,14 +298,13 @@ extension PhotoEditorViewController: UITextViewDelegate {
             textView.frame.size = CGSize(width: oldFrame.width, height: sizeToFit.height)
         }
     }
+    
     public func textViewDidBeginEditing(_ textView: UITextView) {
         lastTextViewTransform =  textView.transform
         lastTextViewTransCenter = textView.center
-        lastTextViewFont = textView.font!
         activeTextView = textView
         textView.superview?.bringSubview(toFront: textView)
-        textView.font = UIFont(name: "Helvetica", size: 30)
-        UIView.animate(withDuration: 0.3,
+        UIView.animate(withDuration: 0.4,
                        animations: {
                         textView.transform = CGAffineTransform.identity
                         textView.center = CGPoint(x: UIScreen.main.bounds.width / 2, y: 100)
@@ -309,13 +313,12 @@ extension PhotoEditorViewController: UITextViewDelegate {
     }
     
     public func textViewDidEndEditing(_ textView: UITextView) {
-        guard lastTextViewTransform != nil && lastTextViewTransCenter != nil && lastTextViewFont != nil
-            else {
-                return
+        guard lastTextViewTransform != nil && lastTextViewTransCenter != nil else {
+            return
         }
         activeTextView = nil
-        textView.font = self.lastTextViewFont!
-        UIView.animate(withDuration: 0.3,
+        
+        UIView.animate(withDuration: 0.4,
                        animations: {
                         textView.transform = self.lastTextViewTransform!
                         textView.center = self.lastTextViewTransCenter!
@@ -379,12 +382,12 @@ extension PhotoEditorViewController: StickerDelegate {
     }
 }
 
-extension PhotoEditorViewController {
+extension PhotoEditorViewController  {
     
     //Resources don't load in main bundle we have to register the font
     func registerFont(){
         let bundle = Bundle(for: PhotoEditorViewController.self)
-        let url =  bundle.url(forResource: "Eventtus-Icons", withExtension: "ttf")
+        let url =  bundle.url(forResource: "ionicons", withExtension: "ttf")
         
         guard let fontDataProvider = CGDataProvider(url: url! as CFURL) else {
             return
@@ -397,3 +400,24 @@ extension PhotoEditorViewController {
     }
 }
 
+extension PhotoEditorViewController: CropViewControllerDelegate{
+    func cropViewController(_ controller: CropViewController, didFinishCroppingImage image: UIImage) {
+        //        controller.dismissViewControllerAnimated(true, completion: nil)
+        //        imageView.image = image
+        //        updateEditButtonEnabled()
+    }
+    
+    func cropViewController(_ controller: CropViewController, didFinishCroppingImage image: UIImage, transform: CGAffineTransform, cropRect: CGRect) {
+        controller.dismiss(animated: true, completion: nil)
+        imageView.image = image
+        let size = image.sutibleSize(widthLimit: UIScreen.main.bounds.width)
+        imageViewHeightConstraint.constant = (size?.height)!
+        //updateEditButtonEnabled()
+    }
+    
+    func cropViewControllerDidCancel(_ controller: CropViewController) {
+        controller.dismiss(animated: true, completion: nil)
+        //updateEditButtonEnabled()
+    }
+
+}
