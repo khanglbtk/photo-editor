@@ -140,7 +140,7 @@ class BottomSheetViewController: UIViewController, UIGestureRecognizerDelegate {
     
     //MARK: Pan Gesture
     
-    func panGesture(_ recognizer: UIPanGestureRecognizer) {
+    @objc func panGesture(_ recognizer: UIPanGestureRecognizer) {
         
         let translation = recognizer.translation(in: self.view)
         let velocity = recognizer.velocity(in: self.view)
@@ -182,7 +182,7 @@ class BottomSheetViewController: UIViewController, UIGestureRecognizerDelegate {
     func removeBottomSheetView() {
         UIView.animate(withDuration: 0.3,
                        delay: 0,
-                       options: UIViewAnimationOptions.curveEaseIn,
+                       options: UIView.AnimationOptions.curveEaseIn,
                        animations: { () -> Void in
                         var frame = self.view.frame
                         frame.origin.y = UIScreen.main.bounds.maxY
@@ -190,7 +190,7 @@ class BottomSheetViewController: UIViewController, UIGestureRecognizerDelegate {
                         
         }, completion: { (finished) -> Void in
             self.view.removeFromSuperview()
-            self.removeFromParentViewController()
+            self.removeFromParent()
             self.stickerDelegate?.bottomSheetDidDisappear()
         })
     }

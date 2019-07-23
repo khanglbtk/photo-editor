@@ -19,7 +19,7 @@ public extension UIImage {
         }
     }
     
-    func rotateImage(orientation: UIImageOrientation) -> UIImage {
+    func rotateImage(orientation: UIImage.Orientation) -> UIImage {
         let rotatedImage = UIImage(cgImage:self.cgImage!,
                                    scale: 1,
                                    orientation:orientation);

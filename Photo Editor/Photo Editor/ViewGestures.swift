@@ -106,7 +106,7 @@ extension PhotoEditorViewController : UIGestureRecognizerDelegate  {
     }
     
     func scaleEffect(view: UIView) {
-        view.superview?.bringSubview(toFront: view)
+        view.superview?.bringSubviewToFront(view)
         
         if #available(iOS 10.0, *) {
             let generator = UIImpactFeedbackGenerator(style: .heavy)
@@ -129,7 +129,7 @@ extension PhotoEditorViewController : UIGestureRecognizerDelegate  {
         hideToolbar(hide: true)
         deleteView.isHidden = false
         
-        view.superview?.bringSubview(toFront: view)
+        view.superview?.bringSubviewToFront(view)
         let point = recognizer.location(in: tempImageView)
         let pointToSuperView = recognizer.location(in: self.view)
         

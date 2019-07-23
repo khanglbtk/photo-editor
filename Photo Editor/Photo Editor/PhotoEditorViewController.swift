@@ -77,11 +77,11 @@ public final class PhotoEditorViewController: UIViewController {
         self.view.addGestureRecognizer(edgePan)
         
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow),
-                                               name: .UIKeyboardWillShow, object: nil)
+                                               name: UIResponder.keyboardWillShowNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide),
-                                               name: .UIKeyboardWillHide, object: nil)
+                                               name: UIResponder.keyboardWillHideNotification, object: nil)
         NotificationCenter.default.addObserver(self,selector: #selector(keyboardWillChangeFrame(_:)),
-                                               name: .UIKeyboardWillChangeFrame, object: nil)
+                                               name: UIResponder.keyboardWillChangeFrameNotification, object: nil)
         
         configureCollectionView()
         bottomSheetVC = BottomSheetViewController(nibName: "BottomSheetViewController", bundle: Bundle(for: BottomSheetViewController.self))
@@ -146,24 +146,24 @@ public final class PhotoEditorViewController: UIViewController {
     }
     
     
-    func keyboardWillShow(notification: NSNotification) {
+    @objc func keyboardWillShow(notification: NSNotification) {
         doneButton.isHidden = false
         colorPickerView.isHidden = false
         hideToolbar(hide: true)
     }
     
-    func keyboardWillHide(notification: NSNotification) {
+    @objc func keyboardWillHide(notification: NSNotification) {
         doneButton.isHidden = true
         hideToolbar(hide: false)
     }
     
-    func keyboardWillChangeFrame(_ notification: NSNotification) {
+    @objc func keyboardWillChangeFrame(_ notification: NSNotification) {
         if let userInfo = notification.userInfo {
-            let endFrame = (userInfo[UIKeyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue
-            let duration:TimeInterval = (userInfo[UIKeyboardAnimationDurationUserInfoKey] as? NSNumber)?.doubleValue ?? 0
-            let animationCurveRawNSN = userInfo[UIKeyboardAnimationCurveUserInfoKey] as? NSNumber
-            let animationCurveRaw = animationCurveRawNSN?.uintValue ?? UIViewAnimationOptions.curveEaseInOut.rawValue
-            let animationCurve:UIViewAnimationOptions = UIViewAnimationOptions(rawValue: animationCurveRaw)
+            let endFrame = (userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue
+            let duration:TimeInterval = (userInfo[UIResponder.keyboardAnimationDurationUserInfoKey] as? NSNumber)?.doubleValue ?? 0
+            let animationCurveRawNSN = userInfo[UIResponder.keyboardAnimationCurveUserInfoKey] as? NSNumber
+            let animationCurveRaw = animationCurveRawNSN?.uintValue ?? UIView.AnimationOptions.curveEaseInOut.rawValue
+            let animationCurve:UIView.AnimationOptions = UIView.AnimationOptions(rawValue: animationCurveRaw)
             if (endFrame?.origin.y)! >= UIScreen.main.bounds.size.height {
                 self.colorPickerViewBottomConstraint?.constant = 0.0
             } else {
@@ -177,9 +177,9 @@ public final class PhotoEditorViewController: UIViewController {
         }
     }
     
-    func image(_ image: UIImage, withPotentialError error: NSErrorPointer, contextInfo: UnsafeRawPointer) {
-        let alert = UIAlertController(title: "Image Saved", message: "Image successfully saved to Photos library", preferredStyle: UIAlertControllerStyle.alert)
-        alert.addAction(UIAlertAction(title: "OK", style: UIAlertActionStyle.default, handler: nil))
+    @objc func image(_ image: UIImage, withPotentialError error: NSErrorPointer, contextInfo: UnsafeRawPointer) {
+        let alert = UIAlertController(title: "Image Saved", message: "Image successfully saved to Photos library", preferredStyle: UIAlertController.Style.alert)
+        alert.addAction(UIAlertAction(title: "OK", style: UIAlertAction.Style.default, handler: nil))
         self.present(alert, animated: true, completion: nil)
     }
     
@@ -245,9 +245,9 @@ public final class PhotoEditorViewController: UIViewController {
         for image in self.stickers {
             bottomSheetVC.stickers.append(image)
         }
-        self.addChildViewController(bottomSheetVC)
+        self.addChild(bottomSheetVC)
         self.view.addSubview(bottomSheetVC.view)
-        bottomSheetVC.didMove(toParentViewController: self)
+        bottomSheetVC.didMove(toParent: self)
         let height = view.frame.height
         let width  = view.frame.width
         bottomSheetVC.view.frame = CGRect(x: 0, y: self.view.frame.maxY , width: width, height: height)
@@ -258,7 +258,7 @@ public final class PhotoEditorViewController: UIViewController {
         self.tempImageView.isUserInteractionEnabled = true
         UIView.animate(withDuration: 0.3,
                        delay: 0,
-                       options: UIViewAnimationOptions.curveEaseIn,
+                       options: UIView.AnimationOptions.curveEaseIn,
                        animations: { () -> Void in
                         var frame = self.bottomSheetVC.view.frame
                         frame.origin.y = UIScreen.main.bounds.maxY
@@ -266,7 +266,7 @@ public final class PhotoEditorViewController: UIViewController {
                         
         }, completion: { (finished) -> Void in
             self.bottomSheetVC.view.removeFromSuperview()
-            self.bottomSheetVC.removeFromParentViewController()
+            self.bottomSheetVC.removeFromParent()
             self.hideToolbar(hide: false)
         })
     }
@@ -303,7 +303,7 @@ extension PhotoEditorViewController: UITextViewDelegate {
         lastTextViewTransform =  textView.transform
         lastTextViewTransCenter = textView.center
         activeTextView = textView
-        textView.superview?.bringSubview(toFront: textView)
+        textView.superview?.bringSubviewToFront(textView)
         UIView.animate(withDuration: 0.4,
                        animations: {
                         textView.transform = CGAffineTransform.identity
@@ -394,7 +394,7 @@ extension PhotoEditorViewController  {
         }
         let font = CGFont(fontDataProvider)
         var error: Unmanaged<CFError>?
-        guard CTFontManagerRegisterGraphicsFont(font, &error) else {
+        guard CTFontManagerRegisterGraphicsFont(font!, &error) else {
             return
         }
     }
