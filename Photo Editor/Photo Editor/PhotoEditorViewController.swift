@@ -136,6 +136,16 @@ public final class PhotoEditorViewController: UIViewController {
         isDrawing = false
     }
     
+    
+    @IBAction func manualCropButtonTapped(_ sender: Any) {
+        let controller = ManualCropViewController()
+        controller.delegate = self
+        controller.image = image
+        
+        let navController = UINavigationController(rootViewController: controller)
+        present(navController, animated: true, completion: nil)
+    }
+    
     @IBAction func cropButtonTapped(_ sender: Any) {
         let controller = CropViewController()
         controller.delegate = self
@@ -420,4 +430,27 @@ extension PhotoEditorViewController: CropViewControllerDelegate{
         //updateEditButtonEnabled()
     }
 
+}
+
+extension PhotoEditorViewController: ManualCropViewControllerDelegate{
+    func cropViewController(_ controller: ManualCropViewController, didFinishCroppingImage image: UIImage) {
+        controller.dismiss(animated: true, completion: nil)
+        imageView.image = image
+        let size = image.sutibleSize(widthLimit: UIScreen.main.bounds.width)
+        imageViewHeightConstraint.constant = (size?.height)!
+    }
+    
+    func cropViewController(_ controller: ManualCropViewController, didFinishCroppingImage image: UIImage, transform: CGAffineTransform, cropRect: CGRect) {
+        controller.dismiss(animated: true, completion: nil)
+        imageView.image = image
+        let size = image.sutibleSize(widthLimit: UIScreen.main.bounds.width)
+        imageViewHeightConstraint.constant = (size?.height)!
+        //updateEditButtonEnabled()
+    }
+    
+    func cropViewControllerDidCancel(_ controller: ManualCropViewController) {
+        controller.dismiss(animated: true, completion: nil)
+        //updateEditButtonEnabled()
+    }
+    
 }
