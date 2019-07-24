@@ -61,6 +61,8 @@ public final class PhotoEditorViewController: UIViewController {
     
     override public func viewDidLoad() {
         super.viewDidLoad()
+        self.navigationController?.setNavigationBarHidden(false, animated: true)
+        //self.navigationController?.navigationBar.titleTextAttributes = [NSAttributedString.Key.font: UIFont(name: "Ionicons", size: 20)!]
         imageView.image = image!
         
         let size = image!.sutibleSize(widthLimit: UIScreen.main.bounds.width)
@@ -140,7 +142,7 @@ public final class PhotoEditorViewController: UIViewController {
     @IBAction func manualCropButtonTapped(_ sender: Any) {
         let controller = ManualCropViewController()
         controller.delegate = self
-        controller.image = image
+        //controller.image = image
         
         let navController = UINavigationController(rootViewController: controller)
         present(navController, animated: true, completion: nil)
@@ -233,6 +235,10 @@ public final class PhotoEditorViewController: UIViewController {
         self.tempImageView.addSubview(textView)
         addGestures(view: textView)
         textView.becomeFirstResponder()
+        
+        doneButton.isHidden = false
+        colorPickerView.isHidden = false
+        hideToolbar(hide: true)
     }
     
     @IBAction func pencilButtonTapped(_ sender: Any) {
@@ -286,6 +292,22 @@ public final class PhotoEditorViewController: UIViewController {
         bottomToolbar.isHidden = hide
     }
     
+    override public func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.destination is ManualCropViewController
+        {
+            let vc = segue.destination as? ManualCropViewController
+            
+            guard let cgImage = imageView.image?.cgImage?.copy() else {
+                return
+            }
+            let newImage = UIImage(cgImage: cgImage,
+                                   scale: imageView.image!.scale,
+                                   orientation: imageView.image!.imageOrientation)
+            
+            vc?.image = newImage
+            vc?.delegate = self
+        }
+    }
 }
 
 extension PhotoEditorViewController: ColorDelegate {
